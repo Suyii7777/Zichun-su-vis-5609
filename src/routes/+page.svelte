@@ -1,4 +1,5 @@
 <script>
+import { base } from '$app/paths';
     let maxClick = $state(2);
 let cnt = $state(2);// tip: https://svelte.dev/docs/svelte/$state
     
@@ -13,7 +14,7 @@ let cnt = $state(2);// tip: https://svelte.dev/docs/svelte/$state
   <h1>[Zichun su]'s VIS Site</h1>
   <img
     width="200px"
-    src="/IMG_0910.jpg"
+    src="{base}/IMG_0910.jpg"
   />
   <div>
     You can click up to
