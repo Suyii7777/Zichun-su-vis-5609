@@ -29,6 +29,7 @@
       });
 
       console.log("Loaded CSV Data:", movies);
+
     } catch (error) {
       console.error("Error loading CSV:", error);
     }
