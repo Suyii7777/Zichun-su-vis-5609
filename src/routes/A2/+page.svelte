@@ -1,6 +1,7 @@
 <script lang="ts">
     import * as d3 from "d3";
     import { Scatter, Line } from "$lib";
+    import RuntimeBar from "$lib/RuntimeBar.svelte";
     import { onMount } from "svelte";
     import type { TMovie } from "../../types";
 
@@ -32,6 +33,34 @@
     }
 
     let yearCountArray = $derived(getYearCountArray(movies));
+
+function getYearRuntimeArray(movies: TMovie[]) {
+    const allYears = [...new Set(movies.map((d) => d.year.getFullYear()))];
+
+    const yearRuntimeArray = allYears.map((year) => {
+        const moviesInYear = movies.filter(
+            (d) => d.year.getFullYear() === year &&
+                d.runtime_minutes > 0
+        );
+
+        const totalRuntime = moviesInYear.reduce(
+            (sum, d) => sum + d.runtime_minutes, 0
+        );
+
+        return {
+            x: new Date(year, 0, 1),
+            y: moviesInYear.length > 0
+                ? totalRuntime / moviesInYear.length
+                : 0,
+        };
+    });
+
+    yearRuntimeArray.sort((a, b) => a.x.getTime() - b.x.getTime());
+    return yearRuntimeArray;
+}
+
+let yearRuntimeArray = $derived(getYearRuntimeArray(movies));
+let runtimeYearRange: [Date, Date] | undefined = $state();
 
     type TAxisSelection = {
         x: keyof TMovie;
@@ -127,6 +156,36 @@
 
         <Line data={yearCountArray} bind:yearRange />
     {/if}
+ 
+{#if movies.length > 0}
+    <hr />
+
+    <h2>Part 4: Summer Movie Runtime Analysis</h2>
+    <p>How has the runtime of summer movies changed over time?</p>
+
+    <h3>Movie Runtime by Year</h3>
+
+    <Scatter
+        movies={runtimeYearRange
+            ? movies.filter(
+                (d) =>
+                    d.year >= runtimeYearRange[0] &&
+                    d.year <= runtimeYearRange[1]
+              )
+            : movies}
+        x="year"
+        y="runtime_minutes"
+        size="num_votes"
+    />
+
+    <h3>Average Movie Runtime by Year</h3>
+
+    <RuntimeBar
+        data={yearRuntimeArray}
+        bind:yearRange={runtimeYearRange}
+    />
+{/if}
+   
 </div>
 
 <style>
